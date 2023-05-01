@@ -1,10 +1,12 @@
 name: Build Docker Images
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      frp-version:
+        type: string
+        required: true
+        description: The frp version (see releases of frp project) to build the image for.
 
 env:
   REGISTRY : ghcr.io
@@ -28,6 +30,7 @@ jobs:
         with:
           fetch-depth: '0'
           repository: 'fatedier/frp'
+          ref: ${{ github.event.inputs.message }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -44,6 +47,7 @@ jobs:
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-server
+          tags: ${{ github.event.inputs.frp-version }}
 
       - name: Build and push frps
         uses: docker/build-push-action@v3
@@ -84,6 +88,7 @@ jobs:
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-client
+          tags: ${{ github.event.inputs.frp-version }}
 
       - name: Build and push frpc
         uses: docker/build-push-action@v3
